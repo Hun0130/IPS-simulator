@@ -2,7 +2,7 @@ import random
 import math
 
 class user:
-    estimate_cor = [0,0]
+    estimate_cor = [1,1]
     integrated_error = 0
     error_num = 0
     def __init__(self, v_cor):
@@ -79,34 +79,37 @@ class user:
         distance += (self.cor[0]/2 - self.estimate_cor[0]/2) ** 2
         distance += (self.cor[1]/2 - self.estimate_cor[1]/2) ** 2
         distance = distance ** 0.5
-        if distance == 0:
-            distance = 1
         return distance
 
     def estimate(self, rssi_list):
-        estimate_grid = {}
-        for i in range(1, 21):
-            for j in range(1, 21):
-                estimate_grid[(i, j)] = 0
-        for beacon_info in rssi_list:
-            if beacon_info[1] != 0:
-                x = []
-                y = []
-                beacon_cor = beacon_info[0]
-                est_distance = math.pow(10, -(beacon_info[1] + 35) / 17)
-                for theta in range(0, 360, 15):
-                    x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
-                    y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
-                for idx in range(len(x)):
-                    if (1 <= x[idx]) and (x[idx] <= 20):
-                        if (1 <= y[idx]) and (y[idx] <= 20):
-                            estimate_grid[(x[idx], y[idx])] += 1
-        prob_cor = 0
-        for cor in estimate_grid.keys():
-            if estimate_grid[cor] > prob_cor:
-                prob_cor = estimate_grid[cor]
-                self.estimate_cor = cor
-        return self.estimate_cor
+        try:
+            estimate_grid = {}
+            for i in range(1, 21):
+                for j in range(1, 21):
+                    estimate_grid[(i, j)] = 0
+            for beacon_info in rssi_list:
+                if beacon_info[1] != 0:
+                    x = []
+                    y = []
+                    beacon_cor = beacon_info[0]
+                    est_distance = math.pow(10, -(beacon_info[1] + 35) / 17) - 1
+                    for theta in range(0, 360, 15):
+                        x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
+                        y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
+                    for idx in range(len(x)):
+                        if (1 <= x[idx]) and (x[idx] <= 20) and (1 <= y[idx]) and (y[idx] <= 20):
+                            estimate_grid[(x[idx], y[idx])] += (1 / (est_distance + 1))
+                            # estimate_grid[(x[idx], y[idx])] += 1
+            prob_cor = 0
+            for cor in estimate_grid.keys():
+                # print(cor, estimate_grid[cor])
+                if estimate_grid[cor] > prob_cor:
+                    prob_cor = estimate_grid[cor]
+                    self.estimate_cor = cor
+            return self.estimate_cor
+        except:
+            print("esti error")
+            input()
 
     def error(self):
         self.integrated_error += self.get_distance()
@@ -117,4 +120,7 @@ class user:
         return self.integrated_error
 
     def whole_error(self):
-        return self.integrated_error / self.error_num
+        if self.error_num != 0:
+            return self.integrated_error / self.error_num
+        else:
+            return 0

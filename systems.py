@@ -160,7 +160,8 @@ class system:
                         self.check = True
                         self.node_num += 1
         except:
-            self.wrong()
+            input()
+            return
 
     # Command: add random 10
     def add_random(self, ipt):
@@ -173,6 +174,7 @@ class system:
                     tmp_ipt = "add node "+ cor_x+","+cor_y
                     self.add_node(tmp_ipt)
         except:
+            input()
             return
 
 
@@ -190,6 +192,7 @@ class system:
                         self.check = True
                         self.node_num -= 1
         except:
+            input()
             return
 
     # Command: set channel 20,20 11
@@ -210,7 +213,8 @@ class system:
                         else:
                             print("Incorrect channel number entered.")
         except:
-            self.wrong()
+            input()
+            return
 
     # Command: add user  20,20
     def add_user(self, ipt):
@@ -228,6 +232,7 @@ class system:
                         self.user.set_cov(cor)
                         self.check = True
         except:
+            input()
             return
 
     # Command: simul start 20,20
@@ -238,6 +243,7 @@ class system:
                 self.user.set_goal([int(x_v), int(y_v)])
                 self.simulation()
         except:
+            input()
             return
 
     # Command: set intfer 11 5
@@ -247,7 +253,7 @@ class system:
                 channel_num, intfer = ipt[13:].split(' ')
                 channel_num = int(channel_num)
                 intfer = int(intfer)
-                if intfer != 0 and intfer != 5 and intfer != 10 and intfer != 20:
+                if intfer != 0 and intfer != 5 and intfer != 10 and intfer != 20 and intfer != 50:
                     print("Incorrect intference entered.")
                 else:
                     check = 0
@@ -261,6 +267,7 @@ class system:
                         self.interference_level[channel_num] = intfer
                         self.check = True
         except:
+            input()
             return
 
     # Wrong command
@@ -276,26 +283,35 @@ class system:
                 rssi_list.append(self.grid_map[cov_v].beacon(self.user.get_cor()))
         return rssi_list
 
+    # get kalman rssi generation
+    def generate_kalman_rssi(self):
+        rssi_list = []
+        for cov_v in self.grid_map.keys():
+            if self.grid_map[cov_v] != 0:
+                rssi_list.append(self.grid_map[cov_v].kalman_beacon(self.user.get_cor()))
+        return rssi_list
+
     # Simulation function
     def simulation(self):
         try:
             self.in_simul = True
             while self.user.get_goal() != self.user.get_cor():
                 esti_cor = self.user.estimate(self.generate_rssi())
-                self.user_grid[tuple(self.user.get_cor())] = 0
-                self.user.travel()
-                self.user_grid[tuple(self.user.get_cor())] = 1
+                #esti_cor = self.user.estimate(self.generate_kalman_rssi())
                 self.esti_grid[esti_cor] = 1
                 self.clear()
                 self.print_grid()
+                self.user_grid[tuple(self.user.get_cor())] = 0
+                self.user.travel()
+                self.user_grid[tuple(self.user.get_cor())] = 1
                 self.esti_grid[esti_cor] = 0
                 if self.user.get_goal() == self.user.get_cor():
                     self.simul_print("Simulation Finish!")
-                    input()
                     break
             self.check = True
             self.in_simul = False
         except:
+            print("simul error")
             return
 
 

@@ -9,19 +9,19 @@ rssi = []
 ple = 1.7
 standard_deviation = random.uniform(10, 12)
 ple = random.uniform(1.6, 1.8)
-standard_deviation = random.uniform(10, 12)
-for i in range(1, 16):
+standard_deviation = random.uniform(2, 4)
+for i in range(0, 16):
     dst = i
     dist.append(dst)
     avg_rss = 0
-    for i in range(100000):
-        avg_rss +=  -50 -10 * ple * math.log10(dst) + numpy.random.normal(0, standard_deviation)
-    avg_rss = avg_rss / 100000
+    for i in range(10000):
+        avg_rss +=  -35 -10 * ple * math.log10(dst+1) + numpy.random.normal(0, standard_deviation)
+    avg_rss = avg_rss / 10000
     print(dst,": ", avg_rss)
     rssi.append(avg_rss)
 
-plt.plot(dist, rssi, linewidth=2, color = 'r')
-plt.show()
+#plt.plot(dist, rssi, linewidth=2, color = 'r')
+#plt.show()
 
 # 1 :  -34.96596299049885
 # 2 :  -47.22179171000779
@@ -39,5 +39,5 @@ plt.show()
 # 14 :  -81.83216920926783
 # 15 :  -82.99460173083266
 for i in rssi:
-    dst = math.pow(10, -(i + 50) / 17)
+    dst = math.pow(10, -(i + 35) / 17) - 1
     print(dst)

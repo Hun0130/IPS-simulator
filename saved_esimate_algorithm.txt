@@ -1,0 +1,54 @@
+1. 각 노드당 15도 간격으로 저장, 그리드에 1+ 확률 추가
+=> 평균에러 1.8285322043067294m :
+2. 각 노드당 30도 간격으로 저장, 그리드에 1+ 확률 추가
+=> 평균에러 2.5377836006507697m 
+3. 거리 7이하로 생각되는 값만 계산, 그리드에 1+ 확률 추가
+=> 평균 에러 1.6927992924920843m
+4. 거리 5이하로 생각되는 값만 계산, 그리드에 1+ 확률 추가
+=> 평균 에러 1.6412997810736052m
+5. 거리 5이하로 생각되는 값만 계산, 그리드에 1/거리+ 확률 추가
+=> 평균 에러 1.296066407171418m
+
+6. 각 노드당 15도 간격으로 저장, 그리드에 1/(예상거리 +1)의 확률 추가 : rssi
+=> 평균 에러 1.5942201467238368
+
+    6의 경우에 20Mbps 간섭 : 
+    => 평균 에러 1.3544534322803747
+
+7. 거리 3이하로 생각되는 값만 계산, 그리드에 1/거리+ 확률 추가
+=> 평균 에러 1.39935243026552로 보아서 오히려 작은 거리만 고려하는 것이 좋다고 생각됨
+    => 이는 rssi값의 노이즈가 굉장히 크기 때문에 단일 신호만으로 계산을 하는것이 어렵기 때문
+
+8. 극단적으로 거리 1이하의 값만 취하면, 
+=> 평균 에러 1.3645266573310169
+
+9. 칼만필터링 0.5 with 간섭
+=> 평균에러 1.3665857508870087
+
+
+
+
+def estimate(self, rssi_list):
+    estimate_grid = {}
+    for i in range(1, 21):
+        for j in range(1, 21):
+            estimate_grid[(i, j)] = 0
+    for beacon_info in rssi_list:
+        if beacon_info[1] != 0:
+            x = []
+            y = []
+            beacon_cor = beacon_info[0]
+            est_distance = math.pow(10, -(beacon_info[1] + 35) / 17)
+            for theta in range(0, 360, 15):
+                x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
+                y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
+            for idx in range(len(x)):
+                if (1 <= x[idx]) and (x[idx] <= 20):
+                    if (1 <= y[idx]) and (y[idx] <= 20):
+                        estimate_grid[(x[idx], y[idx])] += 1
+    prob_cor = 0
+    for cor in estimate_grid.keys():
+        if estimate_grid[cor] > prob_cor:
+            prob_cor = estimate_grid[cor]
+            self.estimate_cor = cor
+    return self.estimate_cor
