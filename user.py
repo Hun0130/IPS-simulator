@@ -82,9 +82,9 @@ class user:
                 y = []
                 beacon_cor = beacon_info[0]
                 est_distance = math.pow(math.e, -(beacon_info[1] + 35) / 17)
-                for theta in range(0, 360, 30):
-                    x.append(round(beacon_cor[0] + est_distance * math.radians(theta)))
-                    y.append(round(beacon_cor[1] + est_distance * math.radians(theta)))
+                for theta in range(0, 360, 15):
+                    x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
+                    y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
                 for idx in range(len(x)):
                     if (1 <= x[idx]) and (x[idx] <= 20):
                         if (1 <= y[idx]) and (y[idx] <= 20):

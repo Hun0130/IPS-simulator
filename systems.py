@@ -2,6 +2,7 @@ import os
 from typing import ChainMap
 import node as nodeset
 import user as us
+import random
 
 class system:
     # use for check to update graphic
@@ -92,17 +93,31 @@ class system:
                 if i == 1:
                     print("Sensor node: ", system.node_num, end='')
                 if i == 2:
-                    print("Current channel: [", end = '')
+                    print("Channel State: ", end = '')
                     for ch in system.channel_list.keys():
                         if (system.channel_list[ch] != []):
-                            print(ch, ":", system.channel_list[ch], sep ='',end='  ' )
-                    print("]", end='')
+                            print(len(system.channel_list[ch])," nodes in ",ch ,"ch", sep ='',end='  ' )
                 if i == 3:
                     print("Interference level: ", end='')
                     for i in system.interference_level.keys():
                         if system.interference_level[i] != 0:
-                            print("[", i, ": ", system.interference_level[i], "Mbps", "]", sep='', end=' ')
-                    print()
+                            print("(", i, "ch: ", system.interference_level[i], "Mbps", ")", sep='', end=' ')
+                if i == 4:
+                    print("Node info", end='')
+                line_num = 5
+                for ch in system.channel_list.keys():
+                    if (system.channel_list[ch] != []):
+                        if i == line_num:
+                            if (len(system.channel_list[ch]) <= 10):
+                                print(ch ,": ",system.channel_list[ch], sep ='',end='  ' )
+                            else:
+                                print(ch ,": [", end='')
+                                for idx in range(10):
+                                    if idx != 9:
+                                        print(system.channel_list[ch][idx], ",", end='' )
+                                    else:
+                                        print(system.channel_list[ch][idx], "...]", end='')
+                            line_num += 1
                 else:
                     print()
 
@@ -135,6 +150,20 @@ class system:
         except:
             system.wrong()
 
+    # Command: add random 10
+    def add_random(ipt):
+        try:
+            if "add random" in ipt:
+                node_num = int(ipt[11:])
+                for i in range(node_num):
+                    cor_x = str(random.randint(1,20))
+                    cor_y = str(random.randint(1,20))
+                    tmp_ipt = "add node "+ cor_x+","+cor_y
+                    system.add_node(tmp_ipt)
+        except:
+            return
+
+
     # Command: remove node 20,20
     def remove_node(ipt):
         try:
@@ -149,7 +178,7 @@ class system:
                         system.check = True
                         system.node_num -= 1
         except:
-            system.wrong()
+            return
 
     # Command: set channel 20,20 11
     def set_channel(ipt):
@@ -173,33 +202,39 @@ class system:
 
     # Command: add user  20,20
     def add_user(ipt):
-        if "add user" in ipt:
-            x_v, y_v = ipt[9:].split(',')
-            cor = []
-            cor.append(int(x_v))
-            cor.append(int(y_v))
-            if system.user_grid.get(tuple(cor)) == None:
-                print("Incorrect coordinates entered.")
-            else:
-                if system.user_grid[tuple(cor)] == 0:
-                    system.user_grid[tuple(cor)] = 1
-                    system.user.set_cov(cor)
-                    system.check = True
+        try:
+            if "add user" in ipt:
+                x_v, y_v = ipt[9:].split(',')
+                cor = []
+                cor.append(int(x_v))
+                cor.append(int(y_v))
+                if system.user_grid.get(tuple(cor)) == None:
+                    print("Incorrect coordinates entered.")
+                else:
+                    if system.user_grid[tuple(cor)] == 0:
+                        system.user_grid[tuple(cor)] = 1
+                        system.user.set_cov(cor)
+                        system.check = True
+        except:
+            return
 
     # Command: simul set
     def simul_set(ipt):      
-        if ipt in "simul set":
-            print("Goal to go: ", end='')
-            goal = input()
-            x_v, y_v = goal.split(',')
-            system.user.set_goal([int(x_v), int(y_v)])
-            print("Do you want to start simulation? (Y/N): ", end='')
-            yn = input()
-            if (str(yn) in "Y") or (str(yn) in "y"):
-                system.simulation()
-                return
-            else:
-                return
+        try:
+            if ipt in "simul set":
+                print("Goal to go: ", end='')
+                goal = input()
+                x_v, y_v = goal.split(',')
+                system.user.set_goal([int(x_v), int(y_v)])
+                print("Do you want to start simulation? (Y/N): ", end='')
+                yn = input()
+                if (str(yn) in "Y") or (str(yn) in "y"):
+                    system.simulation()
+                    return
+                else:
+                    return
+        except:
+            return
 
     # Command: set intfer 11 5
     def set_interfer(ipt):
@@ -222,7 +257,7 @@ class system:
                         system.interference_level[channel_num] = intfer
                         system.check = True
         except:
-            system.wrong()
+            return
 
     # Wrong command
     def wrong():
@@ -239,13 +274,20 @@ class system:
 
     # Simulation function
     def simulation():
-        while system.user.get_goal() != system.user.get_cor():
-            print(system.user.estimate(system.generate_rssi()))
-            system.user_grid[tuple(system.user.get_cor())] = 0
-            system.user.travel()
-            system.user_grid[tuple(system.user.get_cor())] = 1
-            input()
-            system.clear()
-            system.print_grid()
-        system.check = True
-        return
+        try:
+            while system.user.get_goal() != system.user.get_cor():
+                esti_cor = system.user.estimate(system.generate_rssi())
+                system.user_grid[tuple(system.user.get_cor())] = 0
+                system.user.travel()
+                system.user_grid[tuple(system.user.get_cor())] = 1
+                system.esti_grid[esti_cor] = 1
+                input()
+                system.clear()
+                system.print_grid()
+                system.esti_grid[esti_cor] = 0
+            system.check = True
+        except:
+            return
+
+
+
