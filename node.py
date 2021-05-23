@@ -31,8 +31,8 @@ class node:
     # get the distance between node and user
     def get_distance(self, cor_user):
         distance = 0
-        distance += (cor_user[0] - self.cor[0]) ** 2
-        distance += (cor_user[1] - self.cor[0]) ** 2
+        distance += (cor_user[0]/2 - self.cor[0]/2) ** 2
+        distance += (cor_user[1]/2 - self.cor[0]/2) ** 2
         distance = distance ** 0.5
         if distance == 0:
             distance = 1

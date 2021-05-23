@@ -76,8 +76,8 @@ class user:
     # get the distance between two esti_cor and real_cor
     def get_distance(self):
         distance = 0
-        distance += (self.cor[0] - self.estimate_cor[0]) ** 2
-        distance += (self.cor[1] - self.estimate_cor[1]) ** 2
+        distance += (self.cor[0]/2 - self.estimate_cor[0]/2) ** 2
+        distance += (self.cor[1]/2 - self.estimate_cor[1]/2) ** 2
         distance = distance ** 0.5
         if distance == 0:
             distance = 1
@@ -93,7 +93,7 @@ class user:
                 x = []
                 y = []
                 beacon_cor = beacon_info[0]
-                est_distance = math.pow(math.e, -(beacon_info[1] + 35) / 17)
+                est_distance = math.pow(10, -(beacon_info[1] + 35) / 17)
                 for theta in range(0, 360, 15):
                     x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
                     y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
@@ -112,6 +112,9 @@ class user:
         self.integrated_error += self.get_distance()
         self.error_num += 1
         return self.get_distance()
+
+    def intga_error(self):
+        return self.integrated_error
 
     def whole_error(self):
         return self.integrated_error / self.error_num
