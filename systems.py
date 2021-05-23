@@ -108,12 +108,12 @@ class system:
                 for ch in system.channel_list.keys():
                     if (system.channel_list[ch] != []):
                         if i == line_num:
-                            if (len(system.channel_list[ch]) <= 10):
-                                print(ch ,": ",system.channel_list[ch], sep ='',end='  ' )
+                            if (len(system.channel_list[ch]) <= 9):
+                                print(ch ,": ",system.channel_list[ch], sep ='',end='' )
                             else:
                                 print(ch ,": [", end='')
-                                for idx in range(10):
-                                    if idx != 9:
+                                for idx in range(9):
+                                    if idx != 8:
                                         print(system.channel_list[ch][idx], ",", end='' )
                                     else:
                                         print(system.channel_list[ch][idx], "...]", end='')
@@ -284,8 +284,10 @@ class system:
                 input()
                 system.clear()
                 system.print_grid()
+                print("Current Error:", system.user.error())
                 system.esti_grid[esti_cor] = 0
             system.check = True
+            print("Whole Error:", system.user.whole_error())
         except:
             return
 

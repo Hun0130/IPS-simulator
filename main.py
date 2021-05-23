@@ -10,14 +10,16 @@ def main():
         system.update()
         system.print_grid()
         input = system.get_command()
-        system.add_node(input)
-        system.add_random(input)
-        system.remove_node(input)
-        system.set_channel(input)
-        system.set_interfer(input)
-        system.add_user(input)
-        system.simul_set(input)
-        continue
+        if input == "":
+            continue
+        else:
+            system.add_node(input)
+            system.add_random(input)
+            system.remove_node(input)
+            system.set_channel(input)
+            system.set_interfer(input)
+            system.add_user(input)
+            system.simul_set(input)
         if system.exit(input):
             break
     return

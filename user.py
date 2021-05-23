@@ -2,6 +2,9 @@ import random
 import math
 
 class user:
+    estimate_cor = [0,0]
+    integrated_error = 0
+    error_num = 0
     def __init__(self, v_cor):
         # x_axis value # y_axis value
         self.cor = v_cor
@@ -70,8 +73,17 @@ class user:
             else:
                 self.move_left()
     
+    # get the distance between two esti_cor and real_cor
+    def get_distance(self):
+        distance = 0
+        distance += (self.cor[0] - self.estimate_cor[0]) ** 2
+        distance += (self.cor[1] - self.estimate_cor[1]) ** 2
+        distance = distance ** 0.5
+        if distance == 0:
+            distance = 1
+        return distance
+
     def estimate(self, rssi_list):
-        estimate_cor = [0, 0]
         estimate_grid = {}
         for i in range(1, 21):
             for j in range(1, 21):
@@ -93,5 +105,13 @@ class user:
         for cor in estimate_grid.keys():
             if estimate_grid[cor] > prob_cor:
                 prob_cor = estimate_grid[cor]
-                estimate_cor = cor
-        return estimate_cor
+                self.estimate_cor = cor
+        return self.estimate_cor
+
+    def error(self):
+        self.integrated_error += self.get_distance()
+        self.error_num += 1
+        return self.get_distance()
+
+    def whole_error(self):
+        return self.integrated_error / self.error_num
