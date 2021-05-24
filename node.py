@@ -4,18 +4,19 @@ import random
 
 class node:
     per = 0
-    def __init__(self, v_cor):
+    ple_ch = 0
+    def __init__(self, v_cor, ple_seed):
         # x_axis value # y_axis value
         self.cor = v_cor
         self.channel_num = 11
         self.set_interfer(0)
-        # random.seed()
+        self.ple_ch = ple_seed
 
     # set the channel number
-    def set_channel(self, channel_n):
+    def set_channel(self, channel_n, ple_seed):
         # channel number
         self.channel_num = channel_n
-        # random.seed()
+        self.ple_ch = ple_seed
 
     #   0, 5, 10, 20
     def set_interfer(self, intfer):
@@ -47,16 +48,17 @@ class node:
         # ple is different from channel and distance
         # random.seed(self.channel_num)
         # ple = path loss exponent
-        ple = random.uniform(1.6, 1.8)
+        # 1.6 ~ 1.8
+        ple_dist = random.uniform(0.6, 1.0)
         standard_deviation = random.uniform(1, 2)
-        rssi = -35 - 10 * ple * math.log10(distance+1) + numpy.random.normal(0, standard_deviation)
+        rssi = -35 - 10 * (ple_dist + self.ple_ch) * math.log10(distance+1) + numpy.random.normal(0, standard_deviation)
         return rssi
 
     # Table of Packetloss rate with Interferences
     #     WIFI 10Mbps  WIFI 20Mbps  No Interfer  WIFI 5Mbps   WIFI 50Mbps
-    # 1m      4%           8%          0%           2%            90%
-    # 2m      5%           10%         0%           3%            90%
-    # 3m     30%           60%         5%           15%           99%
+    # 1m      4%           8%          0%           2%            20%
+    # 2m      5%           10%         0%           3%            50%
+    # 3m     30%           60%         5%           15%           90%
     # 4m     50%           90%         5%           35%           99%
     # 5m     45%           90%         5%           30%           ...
     # 6m     45%           90%         5%           30%
@@ -90,7 +92,7 @@ class node:
                 else:
                     return False
             if self.interfer == 50:
-                if random.random() <= 0.9:
+                if random.random() <= 0.2:
                     return True
                 else:
                     return False
@@ -113,7 +115,7 @@ class node:
                 else:
                     return False
             if self.interfer == 50:
-                if random.random() <= 0.9:
+                if random.random() <= 0.5:
                     return True
                 else:
                     return False
@@ -139,7 +141,7 @@ class node:
                 else:
                     return False
             if self.interfer == 50:
-                if random.random() <= 0.99:
+                if random.random() <= 0.9:
                     return True
                 else:
                     return False
@@ -294,11 +296,7 @@ class node:
                     return True
                 else:
                     return False
-            if self.interfer == 50:
-                if random.random() <= 0.99:
-                    return True
-                else:
-                    return False
+
         return
 
     # beacon make a rssi value to user
@@ -317,8 +315,8 @@ class node:
         if self.packet_loss(distance):
             return [self.cor, 0]
         else:
-            feedback_const = 0.5
+            feedback_const = 0.4
             rssi_feedback = self.generate_rssi(distance)
             for i in range(3):
-                rssi_feeback = feedback_const * self.generate_rssi(distance) + (1 - feedback_const) * rssi_feedback
+                rssi_feedback = feedback_const * self.generate_rssi(distance) + (1 - feedback_const) * rssi_feedback
             return [self.cor, rssi_feedback]

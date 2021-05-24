@@ -1,43 +1,162 @@
-import matplotlib.pyplot as plt
-import random
-import math
-import numpy
+import systems
 
-dist = []
-rssi = []
-# ple = random.uniform(1.6, 1.8)
-ple = 1.7
-standard_deviation = random.uniform(10, 12)
-ple = random.uniform(1.6, 1.8)
-standard_deviation = random.uniform(2, 4)
-for i in range(0, 16):
-    dst = i
-    dist.append(dst)
-    avg_rss = 0
-    for i in range(10000):
-        avg_rss +=  -35 -10 * ple * math.log10(dst+1) + numpy.random.normal(0, standard_deviation)
-    avg_rss = avg_rss / 10000
-    print(dst,": ", avg_rss)
-    rssi.append(avg_rss)
+def test1():
+    sys = systems.system()
+    sys.add_node("add node 1,1")
+    sys.add_node("add node 1,5")
+    sys.add_node("add node 1,10")
+    sys.add_node("add node 1,15")
+    sys.add_node("add node 1,20")
+    sys.add_node("add node 5,1")
+    sys.add_node("add node 5,5")
+    sys.add_node("add node 5,10")
+    sys.add_node("add node 5,15")
+    sys.add_node("add node 5,20")
+    sys.add_node("add node 10,1")
+    sys.add_node("add node 10,5")
+    sys.add_node("add node 10,10")
+    sys.add_node("add node 10,15")
+    sys.add_node("add node 10,20")
+    sys.add_node("add node 15,1")
+    sys.add_node("add node 15,5")
+    sys.add_node("add node 15,10")
+    sys.add_node("add node 15,15")
+    sys.add_node("add node 15,20")
+    sys.add_node("add node 20,1")
+    sys.add_node("add node 20,5")
+    sys.add_node("add node 20,10")
+    sys.add_node("add node 20,15")
+    sys.add_node("add node 20,20")
+    sys.update()
+    sys.set_interfer("set interfer 11 50")
+    sys.add_user("add user 1,1")
+    sys.simul_start("simul start 20,20")
+    return sys.user.whole_error()
 
-#plt.plot(dist, rssi, linewidth=2, color = 'r')
-#plt.show()
+def test2():
+    sys = systems.system()
+    sys.add_random("add random 10")
+    sys.update()
+    sys.set_interfer("set interfer 11 50")
+    sys.add_user("add user 1,1")
+    sys.simul_start("simul start 20,20")
+    return sys.user.whole_error()
 
-# 1 :  -34.96596299049885
-# 2 :  -47.22179171000779
-# 3 :  -54.46284033982756
-# 4 :  -59.595091405587475
-# 5 :  -63.584725097600625
-# 6 :  -66.8047159850161
-# 7 :  -69.53357760543064
-# 8 :  -71.91774979498788
-# 9 :  -73.97894271864395
-# 10 :  -75.92070923236913
-# 11 :  -77.50098107101974
-# 12 :  -79.05671264822625
-# 13 :  -80.5227140946218
-# 14 :  -81.83216920926783
-# 15 :  -82.99460173083266
-for i in rssi:
-    dst = math.pow(10, -(i + 35) / 17) - 1
-    print(dst)
+def test3():
+    sys = systems.system()
+    sys.add_node("add node 1,1")
+    sys.add_node("add node 1,5")
+    sys.add_node("add node 1,15")
+    sys.add_node("add node 1,20")
+    sys.add_node("add node 5,1")
+    sys.add_node("add node 5,20")
+    sys.add_node("add node 8,1")
+    sys.add_node("add node 8,20")
+    sys.add_node("add node 10,1")
+    sys.add_node("add node 10,20")
+    sys.add_node("add node 15,1")
+    sys.add_node("add node 15,20")
+    sys.add_node("add node 20,1")
+    sys.add_node("add node 20,5")
+    sys.add_node("add node 20,15")
+    sys.add_node("add node 20,20")
+    sys.update()
+    # sys.set_interfer("set interfer 11 50")
+    sys.add_user("add user 1,1")
+    sys.simul_start("simul start 20,20")
+    return sys.user.whole_error()
+
+def test4():
+    sys = systems.system()
+    sys.add_node("add node 1,1")
+    sys.set_channel("set channel 1,1 11")
+    sys.add_node("add node 1,5")
+    sys.set_channel("set channel 1,1 11")
+    sys.add_node("add node 1,15")
+    sys.set_channel("set channel 1,15 16")
+    sys.add_node("add node 1,20")
+    sys.set_channel("set channel 1,20 16")
+    sys.add_node("add node 5,1")
+    sys.set_channel("set channel 5,1 11")
+    sys.add_node("add node 5,20")
+    sys.set_channel("set channel 5,20 16")
+    sys.add_node("add node 8,1")
+    sys.set_channel("set channel 8,1 11")
+    sys.add_node("add node 8,20")
+    sys.set_channel("set channel 8,20 16")
+    sys.add_node("add node 10,1")
+    sys.set_channel("set channel 10,1 21")
+    sys.add_node("add node 10,20")
+    sys.set_channel("set channel 10,20 26")
+    sys.add_node("add node 15,1")
+    sys.set_channel("set channel 15,1 21")
+    sys.add_node("add node 15,20")
+    sys.set_channel("set channel 15,20 26")
+    sys.add_node("add node 20,1")
+    sys.set_channel("set channel 20,1 21")
+    sys.add_node("add node 20,5")
+    sys.set_channel("set channel 20,5 21")
+    sys.add_node("add node 20,15")
+    sys.set_channel("set channel 20,15 26")
+    sys.add_node("add node 20,20")
+    sys.set_channel("set channel 20,20 26")
+    sys.update()
+    sys.set_interfer("set interfer 11 5")
+    #sys.set_interfer("set interfer 16 50")
+    #sys.set_interfer("set interfer 21 50")
+    #sys.set_interfer("set interfer 26 50")
+    sys.add_user("add user 1,1")
+    sys.simul_start("simul start 20,20")
+    return sys.user.whole_error()
+
+def test5():
+    sys = systems.system()
+    sys.add_node("add node 1,1")
+    sys.set_channel("set channel 1,1 11")
+    sys.add_node("add node 1,5")
+    sys.set_channel("set channel 1,1 11")
+    sys.add_node("add node 1,15")
+    sys.set_channel("set channel 1,15 11")
+    sys.add_node("add node 1,20")
+    sys.set_channel("set channel 1,20 11")
+    sys.add_node("add node 5,1")
+    sys.set_channel("set channel 5,1 11")
+    sys.add_node("add node 5,20")
+    sys.set_channel("set channel 5,20 11")
+    sys.add_node("add node 8,1")
+    sys.set_channel("set channel 8,1 11")
+    sys.add_node("add node 8,20")
+    sys.set_channel("set channel 8,20 11")
+    sys.add_node("add node 10,1")
+    sys.set_channel("set channel 10,1 26")
+    sys.add_node("add node 10,20")
+    sys.set_channel("set channel 10,20 26")
+    sys.add_node("add node 15,1")
+    sys.set_channel("set channel 15,1 26")
+    sys.add_node("add node 15,20")
+    sys.set_channel("set channel 15,20 26")
+    sys.add_node("add node 20,1")
+    sys.set_channel("set channel 20,1 26")
+    sys.add_node("add node 20,5")
+    sys.set_channel("set channel 20,5 26")
+    sys.add_node("add node 20,15")
+    sys.set_channel("set channel 20,15 26")
+    sys.add_node("add node 20,20")
+    sys.set_channel("set channel 20,20 26")
+    sys.update()
+    sys.set_interfer("set interfer 11 5")
+    #sys.set_interfer("set interfer 16 50")
+    #sys.set_interfer("set interfer 21 50")
+    sys.set_interfer("set interfer 26 10")
+    sys.add_user("add user 1,1")
+    sys.simul_start("simul start 20,20")
+    return sys.user.whole_error()
+
+def test_log():
+    log = 0
+    log_num = 0
+    for i in range(100):
+        log += test5()
+        log_num += 1
+    print("        Average Error", log / log_num, "meter")
+    return log / log_num
