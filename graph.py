@@ -3,6 +3,9 @@ import random
 import math
 import numpy
 
+# RSS 값 테스트용 파일
+# 신경 안써도 됩니다.
+
 dist = []
 rssi = []
 # ple = random.uniform(1.6, 1.8)

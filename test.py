@@ -1,4 +1,5 @@
 import systems
+# test를 위한 command 모음
 
 def test1():
     sys = systems.system()
@@ -152,11 +153,16 @@ def test5():
     sys.simul_start("simul start 20,20")
     return sys.user.whole_error()
 
-def test_log():
+# 지정한 simulation을 100번씩 반복
+def test_log(test_num):
     log = 0
     log_num = 0
     for i in range(100):
-        log += test5()
+        if test_num == 1: log += test1()
+        if test_num == 2: log += test2()
+        if test_num == 3: log += test3()
+        if test_num == 4: log += test4()
+        if test_num == 5: log += test5()
         log_num += 1
     print("        Average Error", log / log_num, "meter")
     return log / log_num

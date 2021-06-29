@@ -3,58 +3,72 @@ from typing import ChainMap
 import node as nodeset
 import user as us
 import random
+import test
+
+# system 객체 파일
 
 class system:
+    # system 객체 생성자
     def __init__(self):
-        # use for check to update graphic
+        # 그래픽 업데이트를 체크하기 위한 변수
         self.check = True
         
-        # number of sensor nodes
+        # 센서 노드(비콘 노드)의 수
         self.node_num = 0
         
-        # user node
+        # 유저 노드의 객체 (user 파일 참조)
         self.user =  us.user((0, 0))
         
-        # the list of the channel used now
+        # 현재 사용되는 channel : dict 형태로 저장됨
         self.channel_list = {}
         for i in range(11, 27):
             self.channel_list[i] = []
         
-        # the level of Interference
+        # channel별 간섭의 레벨 : dict 형태로 저장됨
+        # 기본 간섭은 0Mbps
         self.interference_level = {}
         for i in range(11, 27):
             self.interference_level[i] = 0
         
-        # grid_map information
+        # 센서 노드를 위한 grid map : dict 형태로 저장됨
+        # 값이 0이면 node가 없는 것 / 값이 1이면 node가 있는 것
         self.grid_map = {}
         for i in range(1, 21):
             for j in range(1, 21):
                 self.grid_map[(i,j)] = 0
         
-        # user grid information
+        # 유저 노드를 위한 grid map : dict 형태로 저장됨
+        # 유저 노드의 실제 위치를 저장
+        # 값이 0이면 user가 없는 것 / 값이 1이면 user가 있는 것
         self.user_grid = {}
         for i in range(1, 21):
             for j in range(1, 21):
-                self.user_grid[(i,j)]= 0
+                self.user_grid[(i,j)] = 0
         
-        # estimation grid information
+        # 유저 노드를 위한 grid map : dict 형태로 저장됨
+        # 유저 노드의 예측 위치를 저장
+        # 값이 0이면 user가 없는 것 / 값이 1이면 user가 있는 것
         self.esti_grid = {}
         for i in range(1, 21):
             for j in range(1, 21):
                 self.esti_grid[(i,j)] = 0
 
-        # check is in simulating
+        # 시뮬레이션 중인지 체크를 위한 변수
+        # True면 시뮬레이션 중
         self.in_simul = False
 
-        # random seed for packet loss exponent by channel
+        # 채널에 따른 packet loss exponent를 랜덤하게 설정
+        # 0.6에서 1.4 사이
         self.ple_seed ={}
         for i in range(11,27):
             self.ple_seed[i] = random.uniform(0.6, 1.4)
 
-    # update the node info
+    # 노드 정보를 업데이트
     def update(self):
+        # 채널리스트 초기화
         for i in range(11, 27):
             self.channel_list[i] = []
+        # 채널리스트에 노드들을 추가
         for cov_v in self.grid_map.keys():
             if self.grid_map[cov_v] != 0:
                 node = self.grid_map[cov_v]
@@ -62,18 +76,20 @@ class system:
                     self.channel_list[node.get_channel()].append(node.get_cor())
         return
 
-    # erase consol graphic
+    # 콘솔 그래픽삭제
+    # 'clear'는 리눅스용
+    # 'cls'는 윈도우용 (윈도우에서 실행시 'cls'로 바꿔야 함)
     def clear(self):
         if self.check == True:
             os.system('clear')
         return
 
-    # Center Alignment Output
+    # 가운데 정렬하여서 출력
     def simul_print(self, string):
         print("{:^100}".format(string))
         return
 
-    # print grid
+    # 콘솔 그래픽 출력
     def print_grid(self):
         try:
             if self.check == True:
@@ -151,20 +167,20 @@ class system:
             print("print grid error")
             input()
 
-    # get command input
+    # command input 받아옴
     def get_command(self):
         print("      Command: ", end='')
         return input()
 
-    # Command: finish 
-    def exit(self,ipt):
+    # Command: finish 로 실행
+    def finish(self,ipt):
         if ipt == "finish":
             print("Bye!")
             return True
         else:
             return False
 
-    # Command: add node 20,20
+    # Command: add node 20,20 로 실행
     def add_node(self,ipt):
         try:
             if "add node" in ipt:
@@ -182,7 +198,7 @@ class system:
             input()
             return
 
-    # Command: add random 10
+    # Command: add random 10 로 실행
     def add_random(self, ipt):
         try:
             if "add random" in ipt:
@@ -198,7 +214,7 @@ class system:
             return
 
 
-    # Command: remove node 20,20
+    # Command: remove node 20,20 로 실행
     def remove_node(self, ipt):
         try:
             if "remove node" in ipt:
@@ -216,7 +232,7 @@ class system:
             input()
             return
 
-    # Command: set channel 20,20 11
+    # Command: set channel 20,20 11 로 실행
     def set_channel(self, ipt):
         try:
             if "set channel" in ipt:
@@ -238,7 +254,7 @@ class system:
             input()
             return
 
-    # Command: add user  20,20
+    # Command: add user 20,20 로 실행
     def add_user(self, ipt):
         try:
             if "add user" in ipt:
@@ -258,19 +274,19 @@ class system:
             input()
             return
 
-    # Command: simul start 20,20
+    # Command: simul start 20,20 로 실행
     def simul_start(self, ipt):   
-        # try:   
+        try:   
             if "simul start" in ipt:
                 x_v, y_v = ipt[11:].split(',')
                 self.user.set_goal([int(x_v), int(y_v)])
                 self.simulation()
-        # except:
-        #     print("simul start error")
-        #     input()
-        #     return
+        except:
+            print("simul start error")
+            input()
+            return
 
-    # Command: set intfer 11 5
+    # Command: set intfer 11 5 로 실행
     def set_interfer(self, ipt):
         try:
             if "set interfer" in ipt:
@@ -295,12 +311,26 @@ class system:
             input()
             return
 
-    # Wrong command
+    # Test를 위한 함수
+    def test(self, ipt):
+        try:
+            if "test" in ipt:
+                test_num = ipt[5:]
+                test_num = int(test_num)
+                test.test_log(test_num)
+                input()
+        except:
+            print("test error")
+            input()
+            return
+
+    # 틀린 커맨드가 입력될 시
     def wrong(self):
         print("Wrong command input")
         self.check = False
 
-    # get rssi generation
+    # 센서 노드들로부터 RSSI 신호를 받아옴
+    # 각 rssi값들을 리스트 형태로 반환
     def generate_rssi(self):
         rssi_list = []
         for cov_v in self.grid_map.keys():
@@ -308,7 +338,8 @@ class system:
                 rssi_list.append(self.grid_map[cov_v].beacon(self.user.get_cor()))
         return rssi_list
 
-    # get kalman rssi generation
+    # 센서 노드들로부터 RSSI 신호를 받아옴
+    # 각 rssi값들을 리스트 형태로 반환 (칼만 필터를 적용시켜서)
     def generate_kalman_rssi(self):
         rssi_list = []
         for cov_v in self.grid_map.keys():
@@ -316,28 +347,34 @@ class system:
                 rssi_list.append(self.grid_map[cov_v].kalman_beacon(self.user.get_cor()))
         return rssi_list
 
-    # Simulation function
+    # 시뮬레이션 함수 
     def simulation(self):
-        # try:
+        try:
             self.in_simul = True
+            # 유저노드가 목표점까지 도착할 때까지 반복
             while self.user.get_goal() != self.user.get_cor():
+                # RSSI 신호를 통해서 좌표를 예측 
+                # ========== user.estimate 함수를 다른 함수로 변경해서 예측 알고리즘을 변경 가능 =============
                 esti_cor = self.user.estimate(self.generate_rssi())
+                # ============================================================================================
+                # RSSI 신호를 통해서 좌표를 예측 (칼만 필터 적용 버전)
                 # esti_cor = self.user.estimate(self.generate_kalman_rssi())
                 self.esti_grid[esti_cor] = 1
                 self.clear()
                 self.print_grid()
                 self.user_grid[tuple(self.user.get_cor())] = 0
+                # 유저 위치 변경 (목표점으로 랜덤하게 이동하는 것)
                 self.user.travel()
                 self.user_grid[tuple(self.user.get_cor())] = 1
                 self.esti_grid[esti_cor] = 0
             self.simul_print("Simulation Finish!")
             self.check = True
             self.in_simul = False
-        # except:
-        #     print(self.user.get_goal(), self.user.get_cor())
-        #     print("simulation error")
-        #     input()
-        #     return
+        except:
+            print("simulation error")
+            input()
+            return
+
 
 
 

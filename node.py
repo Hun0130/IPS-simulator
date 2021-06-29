@@ -2,36 +2,44 @@ import math
 import numpy
 import random
 
+# 센서 노드 객체 파일
+
 class node:
+    # 패킷 로스율 값
     per = 0
+    # 패킷 로스 익스포넌트 값 (채널에 따른 값)
     ple_ch = 0
+
+    # 노드 객체 생성자 (좌표와 ple seed)
     def __init__(self, v_cor, ple_seed):
-        # x_axis value # y_axis value
+        # x 축 좌표 값과 y 축 좌표 값
         self.cor = v_cor
+        # 기본 채널은 11번
         self.channel_num = 11
+        # 기본 채널 간섭은 0Mbps
         self.set_interfer(0)
+        # ple 값은 ple seed
         self.ple_ch = ple_seed
 
-    # set the channel number
+    # 노드의 채널을 channel_n로 세팅
     def set_channel(self, channel_n, ple_seed):
-        # channel number
         self.channel_num = channel_n
         self.ple_ch = ple_seed
 
-    #   0, 5, 10, 20
+    # 채널 간섭을 0, 5, 10, 20 Mbps 중 하나로 결정
     def set_interfer(self, intfer):
         self.interfer = intfer
         return 
 
-    # get the channel number
+    # 채널 수를 반환
     def get_channel(self):
         return self.channel_num
     
-    # get the Coordinates
+    # 센서 노드의 좌표를 반환
     def get_cor(self):
         return self.cor
 
-    # get the distance between node and user
+    # 노드와 유저 사이의 거리를 반환
     def get_distance(self, cor_user):
         distance = 0
         distance += (cor_user[0]/2 - self.cor[0]/2) ** 2
@@ -39,6 +47,8 @@ class node:
         distance = distance ** 0.5
         return distance
 
+    # 노드에서 RSSI 값을 생성 (사용자와의 거리와 PLE값을 통해서 계산됨)
+    # RSSI 값은 논문에서 구한 RSSI 모델링 식을 통해서 역생산됨
     # PL^_(d)[dBm] = PL^_(d0) + 10 * n log (d / d0)
     # PL(d) : N(PL^_, X_σ) where a Gaussian distributed random variable with zero mean and σ standard deviation (the units are dBm)
     # n is path loss exponent 
@@ -49,11 +59,15 @@ class node:
         # random.seed(self.channel_num)
         # ple = path loss exponent
         # 1.6 ~ 1.8
+        
+        # 거리에 따른 ple 값도 랜덤하게 분포함
         ple_dist = random.uniform(0.6, 1.0)
         standard_deviation = random.uniform(1, 2)
         rssi = -35 - 10 * (ple_dist + self.ple_ch) * math.log10(distance+1) + numpy.random.normal(0, standard_deviation)
         return rssi
 
+    # 거리와 간섭정도에 따른 패킷로스를 걱정
+    # 패킷 로스율은 논문에 제공된 데이터를 사용
     # Table of Packetloss rate with Interferences
     #     WIFI 10Mbps  WIFI 20Mbps  No Interfer  WIFI 5Mbps   WIFI 50Mbps
     # 1m      4%           8%          0%           2%            20%
@@ -299,8 +313,8 @@ class node:
 
         return
 
-    # beacon make a rssi value to user
-    # If channel loss exist, return 0
+    # RSSI 데이터를 생성해서 뿌려줌
+    # 패킷 로스가 잃어나면, 0을 반환함
     def beacon(self, cor_user):
         distance = self.get_distance(cor_user)
         if self.packet_loss(distance):
@@ -308,8 +322,8 @@ class node:
         else:
             return [self.cor, self.generate_rssi(distance)]
 
-    # beacon make a rssi value to user
-    # If channel loss exist, return 0
+    # RSSI 데이터를 생성해서 뿌려줌 (칼만필터 적용)
+    # 패킷 로스가 잃어나면, 0을 반환함
     def kalman_beacon(self, cor_user):
         distance = self.get_distance(cor_user)
         if self.packet_loss(distance):
