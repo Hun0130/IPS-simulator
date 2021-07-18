@@ -53,6 +53,12 @@ class system:
             for j in range(1, 21):
                 self.esti_grid[(i,j)] = 0
 
+        # KNN 구현을 위해 생성한 Radio map
+        self.radio_map = {}
+        for i in range(1, 21):
+            for j in range(1, 21):
+                self.radio_map[(i,j)] = []
+
         # 시뮬레이션 중인지 체크를 위한 변수
         # True면 시뮬레이션 중
         self.in_simul = False
@@ -276,15 +282,11 @@ class system:
 
     # Command: simul start 20,20 로 실행
     def simul_start(self, ipt):   
-        try:   
-            if "simul start" in ipt:
-                x_v, y_v = ipt[11:].split(',')
-                self.user.set_goal([int(x_v), int(y_v)])
-                self.simulation()
-        except:
-            print("simul start error")
-            input()
-            return
+        if "simul start" in ipt:
+            x_v, y_v = ipt[11:].split(',')
+            self.user.set_goal([int(x_v), int(y_v)])
+            self.simulation()
+        return
 
     # Command: set intfer 11 5 로 실행
     def set_interfer(self, ipt):
@@ -313,14 +315,10 @@ class system:
 
     # Test를 위한 함수
     def test(self, ipt):
-        try:
-            if "test" in ipt:
-                test_num = ipt[5:]
-                test_num = int(test_num)
-                test.test_log(test_num)
-                input()
-        except:
-            print("test error")
+        if "test" in ipt:
+            test_num = ipt[5:]
+            test_num = int(test_num)
+            test.test_log(test_num)
             input()
             return
 
@@ -347,33 +345,58 @@ class system:
                 rssi_list.append(self.grid_map[cov_v].kalman_beacon(self.user.get_cor()))
         return rssi_list
 
+    # KNN 구현을 위한 Radio map 업데이트
+    def radiomap_update(self):
+        for i in range(1, 21):
+            for j in range(1, 21):
+                for cov_v in self.grid_map.keys():
+                    if self.grid_map[cov_v] != 0:
+                        self.radio_map[(i,j)].append(self.grid_map[cov_v].beacon_100((i,j)))
+
     # 시뮬레이션 함수 
     def simulation(self):
-        try:
-            self.in_simul = True
-            # 유저노드가 목표점까지 도착할 때까지 반복
-            while self.user.get_goal() != self.user.get_cor():
-                # RSSI 신호를 통해서 좌표를 예측 
-                # ========== user.estimate 함수를 다른 함수로 변경해서 예측 알고리즘을 변경 가능 =============
-                esti_cor = self.user.estimate(self.generate_rssi())
-                # ============================================================================================
-                # RSSI 신호를 통해서 좌표를 예측 (칼만 필터 적용 버전)
-                # esti_cor = self.user.estimate(self.generate_kalman_rssi())
-                self.esti_grid[esti_cor] = 1
-                self.clear()
-                self.print_grid()
-                self.user_grid[tuple(self.user.get_cor())] = 0
-                # 유저 위치 변경 (목표점으로 랜덤하게 이동하는 것)
-                self.user.travel()
-                self.user_grid[tuple(self.user.get_cor())] = 1
-                self.esti_grid[esti_cor] = 0
-            self.simul_print("Simulation Finish!")
-            self.check = True
-            self.in_simul = False
-        except:
-            print("simulation error")
-            input()
-            return
+        self.in_simul = True
+
+        # KNN 사용시 사용할 것
+        # self.radiomap_update()
+
+        # 유저노드가 목표점까지 도착할 때까지 반복
+        while self.user.get_goal() != self.user.get_cor():
+            # 기존 알고리즘 
+            # ========== user.estimate 함수를 다른 함수로 변경해서 예측 알고리즘을 변경 가능 =============
+            esti_cor = self.user.estimate(self.generate_rssi())
+            # ============================================================================================
+
+            # KNN 3 적용하여 좌표를 예측 
+            # ============================================================================================
+            # esti_cor = [0, 0]
+            # for i in range(3):
+            #     esti_value = self.user.knn_estimate(self.generate_rssi(), self.radio_map)
+            #     esti_cor[0] += esti_value[0]
+            #     esti_cor[1] += esti_value[1]
+            # esti_cor[0] = round (esti_cor[0] / 3)
+            # esti_cor[1] = round (esti_cor[1] / 3)
+            # esti_cor = tuple(esti_cor)
+            # ============================================================================================
+
+            # RSSI 신호를 통해서 좌표를 예측 (칼만 필터 적용 버전)
+            # ============================================================================================
+            # esti_cor = self.user.estimate(self.generate_kalman_rssi())
+            # ============================================================================================
+
+            self.esti_grid[esti_cor] = 1
+            self.clear()
+            self.print_grid()
+            # input()
+            self.user_grid[tuple(self.user.get_cor())] = 0
+            # 유저 위치 변경 (목표점으로 랜덤하게 이동하는 것)
+            self.user.travel()
+            self.user_grid[tuple(self.user.get_cor())] = 1
+            self.esti_grid[esti_cor] = 0
+        self.simul_print("Simulation Finish!")
+        self.check = True
+        self.in_simul = False
+        return
 
 
 

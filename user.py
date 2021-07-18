@@ -111,39 +111,63 @@ class user:
     # ================== 이 함수를 수정해서 예측 알고리즘을 변경 할 수 있음 ========================
     def estimate(self, rssi_list):
         self.packet_loss_num = 0
-        try:
-            estimate_grid = {}
-            for i in range(1, 21):
-                for j in range(1, 21):
-                    estimate_grid[(i, j)] = 0
-            for beacon_info in rssi_list:
-                self.all_packet_get += 1
-                if beacon_info[1] != 0:
-                    x = []
-                    y = []
-                    beacon_cor = beacon_info[0]
-                    # 여기서 18의 값은 ple_dist + ple_ch의 평균으로 Least Mean Squared 값을 사용했다고 가정함
-                    est_distance = math.pow(10, -(beacon_info[1] + 35) / 18) - 1
-                    theta_interval = 15
-                    for theta in range(0, 360, theta_interval):
-                        x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
-                        y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
-                    for idx in range(len(x)):
-                        if (1 <= x[idx]) and (x[idx] <= 20) and (1 <= y[idx]) and (y[idx] <= 20):
-                            estimate_grid[(x[idx], y[idx])] += (1 / (est_distance + 1))
-                else:
-                    self.packet_loss_num += 1
-                    self.all_packet_loss_num += 1
-            prob_cor = 0
-            for cor in estimate_grid.keys():
-                if estimate_grid[cor] > prob_cor:
-                    prob_cor = estimate_grid[cor]
-                    self.estimate_cor = cor
-            return self.estimate_cor
-        except:
-            print("esti error")
-            input()
+        estimate_grid = {}
+        for i in range(1, 21):
+            for j in range(1, 21):
+                estimate_grid[(i, j)] = 0
+        for beacon_info in rssi_list:
+            if beacon_info[1] != 0:
+                x = []
+                y = []
+                beacon_cor = beacon_info[0]
+                # 여기서 18의 값은 ple_dist + ple_ch의 평균으로 Least Mean Squared 값을 사용했다고 가정함
+                est_distance = math.pow(10, -(beacon_info[1] + 35) / 18) - 1
+                theta_interval = 15
+                for theta in range(0, 360, theta_interval):
+                    x.append(round(beacon_cor[0] + est_distance * math.cos(math.radians(theta))))
+                    y.append(round(beacon_cor[1] + est_distance * math.sin(math.radians(theta))))
+                for idx in range(len(x)):
+                    if (1 <= x[idx]) and (x[idx] <= 20) and (1 <= y[idx]) and (y[idx] <= 20):
+                        estimate_grid[(x[idx], y[idx])] += (1 / (est_distance + 1))
+            else:
+                self.packet_loss_num += 1
+                self.all_packet_loss_num += 1
+        prob_cor = 0
+        for cor in estimate_grid.keys():
+            if estimate_grid[cor] > prob_cor:
+                prob_cor = estimate_grid[cor]
+                self.estimate_cor = cor
+        return self.estimate_cor
     # =============================================================================================
+
+    # KNN 구현에 사용, 유사성 도출을 위한 distance 공식
+    def get_knn_distance(self, rssi_list, radio_list):
+        distance = 0
+        for i in range(len(rssi_list)):
+            if rssi_list[i][1] != 0:
+                distance += (rssi_list[i][1] - radio_list[i]) **  2
+        distance = distance ** 0.5
+        return distance
+
+    # KNN 예측법
+    def knn_estimate(self, rssi_list, radio_map):
+        self.packet_loss_num = 0
+        for beacon_info in rssi_list:
+            if beacon_info[1] == 0:
+                self.packet_loss_num += 1
+                self.all_packet_loss_num += 1
+        estimate_grid = {}
+        for i in range(1, 21):
+            for j in range(1, 21):
+                estimate_grid[(i, j)] = 0
+                estimate_grid[(i, j)] += self.get_knn_distance(rssi_list, radio_map[(i,j)])
+        prob_cor = estimate_grid[(1,1)]
+        for cor in estimate_grid.keys():
+            if estimate_grid[cor] <= prob_cor:
+                prob_cor = estimate_grid[cor]
+                self.estimate_cor = cor
+        print(self.estimate_cor)
+        return list(self.estimate_cor)
 
     # 예측 좌표와 실제 좌표와의 차이 (에러)를 반환
     def error(self):

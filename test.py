@@ -157,7 +157,7 @@ def test5():
 def test_log(test_num):
     log = 0
     log_num = 0
-    for i in range(100):
+    for i in range(5):
         if test_num == 1: log += test1()
         if test_num == 2: log += test2()
         if test_num == 3: log += test3()

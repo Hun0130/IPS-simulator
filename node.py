@@ -59,7 +59,7 @@ class node:
         # random.seed(self.channel_num)
         # ple = path loss exponent
         # 1.6 ~ 1.8
-        
+
         # 거리에 따른 ple 값도 랜덤하게 분포함
         ple_dist = random.uniform(0.6, 1.0)
         standard_deviation = random.uniform(1, 2)
@@ -334,3 +334,13 @@ class node:
             for i in range(3):
                 rssi_feedback = feedback_const * self.generate_rssi(distance) + (1 - feedback_const) * rssi_feedback
             return [self.cor, rssi_feedback]
+
+
+    def beacon_100(self, cor_user):
+        rssi_value = 0
+        distance = self.get_distance(cor_user)
+        for i in range(100):
+            rssi_value += self.generate_rssi(distance)
+        rssi_value = rssi_value / 100
+        return rssi_value
+
